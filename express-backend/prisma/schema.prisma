@@ -1,0 +1,235 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String    @id @default(cuid())
+  name           String?
+  bio            String?   @db.Text
+  email          String    @unique
+  emailVerified  DateTime?
+  image          String?
+  hashedPassword String?
+  role           Role      @default(USER)
+
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  isOnline         Boolean   @default(false)
+  lastActive       DateTime?
+  pushSubscription Json?
+  deviceReady      Boolean   @default(false)
+
+  // relations
+  accounts      Account[]
+  sessions      Session[]
+  messages      Message[] // Messages sent by this user
+  conversations ConversationParticipant[] // Conversations this user is part of
+  clipboard     Clipboard[]
+  contacts      Contact[]                 @relation("UserOwnedContacts") // Contacts owned by this user
+  inContacts    Contact[]                 @relation("UserInOtherContacts") // Where this user appears in others' contacts
+  files         File[] // Files uploaded by this user
+
+  @@index([createdAt])
+  @@index([lastActive])
+}
+
+enum Role {
+  USER
+  ADMIN
+  SUPERADMIN
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId]) // Add index for querying sessions by user
+  @@index([expires]) // Add index for querying/cleaning up expired sessions
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+model Clipboard {
+  id      String @id @default(cuid())
+  content String @db.Text
+  user    User   @relation(fields: [userid], references: [id], onDelete: Cascade)
+  userid  String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userid])
+}
+
+model Conversation {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // Relations
+  participants ConversationParticipant[]
+  messages     Message[]
+
+  @@index([createdAt])
+}
+
+model ConversationParticipant {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id])
+
+  // Add constraints
+  @@index([conversationId])
+  @@index([userId])
+}
+
+model Contact {
+  id        String @id @default(cuid())
+  ownerId   String // The user who owns the contact list
+  owner     User   @relation("UserOwnedContacts", fields: [ownerId], references: [id])
+  contactId String // The user who is a contact
+  contact   User   @relation("UserInOtherContacts", fields: [contactId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([ownerId, contactId]) // Avoid duplicate contacts
+  @@index([ownerId])
+  @@index([contactId])
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  DOCUMENT
+  AUDIO
+  OTHER
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  content        String?      @db.Text
+  media          Media[]
+  senderId       String?
+  sender         User?        @relation(fields: [senderId], references: [id], onDelete: SetNull)
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  received  Boolean   @default(false)
+  read      Boolean   @default(false)
+  // New reply functionality fields
+  parentId  String?   @map("parent_id") // Reference to original message
+  parent    Message?  @relation("Replies", fields: [parentId], references: [id], onDelete: SetNull)
+  replies   Message[] @relation("Replies") // All replies to this message
+
+  @@index([senderId])
+  @@index([conversationId])
+  @@index([createdAt])
+  @@index([parentId])
+}
+
+model Media {
+  id           String    @id @default(cuid())
+  url          String // URL to stored media
+  type         MediaType // Type of media
+  mimeType     String? // MIME type for proper handling
+  filename     String? // Original filename
+  size         Int? // File size in bytes
+  width        Int? // Image/video width
+  height       Int? // Image/video height
+  duration     Int? // Video/audio duration in seconds
+  thumbnailUrl String? // URL to thumbnail for videos/images
+  messageId    String
+  message      Message   @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  createdAt    DateTime  @default(now())
+}
+
+// Add these new enums first
+enum FileType {
+  IMAGE
+  VIDEO
+  DOCUMENT
+  AUDIO
+  ARCHIVE
+  OTHER
+}
+
+enum FileStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+// Add the File model
+model File {
+  id              String     @id @default(cuid())
+  url             String     @unique // File storage URL
+  filename        String // Original filename
+  type            FileType // File category
+  size            Int // File size in bytes
+  mimeType        String // MIME type
+  status          FileStatus @default(PENDING)
+  virusScanStatus String     @default("pending") // Could be enum if needed
+  userId          String
+  user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  deletedAt       DateTime? // For soft deletion
+  downloads       Int        @default(0)
+
+  // Optional metadata fields
+  width        Int? // For images/videos
+  height       Int? // For images/videos
+  duration     Int? // For audio/video
+  thumbnailUrl String? // For media previews
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([type])
+}
