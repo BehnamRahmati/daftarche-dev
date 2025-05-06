@@ -1,36 +1,39 @@
-import { Skeleton } from '@/components/ui/skeleton'
-import useUser from '@/hooks/use-user'
+import ListLoading from '@/list-loading'
+import {
+	selectClipboards,
+	selectClipboardsAreLoading,
+	selectClipboardsError,
+} from '@/store/features/clipboards/clipboard-selectors'
 import { fetchClipboards } from '@/store/features/clipboards/clipboard-thunks'
+import { selectUser } from '@/store/features/user/user-selectors'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import { RootState } from '@/store/store'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import ClipboardsListItem from './clipboards-list-item'
 
 export default function ClipboardsList() {
 	const dispatch = useAppDispatch()
-	const { user } = useUser()
-	const { clipboards, isLoading, error } = useAppSelector((state: RootState) => state.clipboards)
+	const user = useAppSelector(selectUser)
+	const userId = user?.id
+	const clipboards = useAppSelector(selectClipboards)
+	const clipbordsItems = clipboards?.length
+	const isLoading = useAppSelector(selectClipboardsAreLoading)
+	const error = useAppSelector(selectClipboardsError)
+
+	const clipbordsListRef = useRef<HTMLDivElement | null>(null)
 
 	useEffect(() => {
-		if (user) {
-			dispatch(fetchClipboards(user?.id))
+		if (clipbordsListRef.current && userId && !clipbordsItems) {
+			console.warn('fetching clipboards')
+			dispatch(fetchClipboards(userId))
 		}
-	}, [dispatch, user])
-
-	const renderLoading = () => {
-		return (
-			<div className='flex flex-col gap-2.5'>
-				<Skeleton className='w-full h-10' />
-				<Skeleton className='w-full h-10' />
-				<Skeleton className='w-full h-10' />
-			</div>
-		)
-	}
+	}, [dispatch, userId, clipbordsItems])
 
 	return (
-		<div className='my-10 lg:w-3xl mx-auto'>
-			{isLoading && renderLoading()}
-			{error && <div className='error-message '>Error loading clipboards: {error}</div>}
+		<div className='my-10 lg:w-3xl mx-auto' ref={clipbordsListRef}>
+			{isLoading && <ListLoading />}
+			{error && (
+				<div className='error-message '>Error loading clipboards: {error.message}</div>
+			)}
 			{clipboards && !isLoading && !error && (
 				<div>
 					<div className='bg-accent p-2.5 mt-2.5 flex items-center gap-2.5 rounded-md shadow-sm *:font-semibold'>

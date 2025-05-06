@@ -1,7 +1,7 @@
 // Define Enums first (assuming they are exported from prisma client or defined manually)
 export type TRole = 'USER' | 'ADMIN' | 'SUPERADMIN' // Already in types.ts, potentially use Prisma generated type
 export type TMediaType = 'IMAGE' | 'VIDEO' | 'DOCUMENT' | 'AUDIO' | 'OTHER'
-export type TFileType = 'IMAGE' | 'VIDEO' | 'DOCUMENT' | 'AUDIO' | 'ARCHIVE' | 'OTHER'
+export type TFileType = 'DIRECT' | 'PROXY'
 export type TFileStatus = 'PENDING' | 'COMPLETED' | 'FAILED'
 
 // Define types for Models

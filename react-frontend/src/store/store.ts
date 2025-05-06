@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit'
-import clipboardsReducer from './features/clipboards/clipboardsSlice'
-import filesReducer from './features/files/filesSlice'
-import userReducer from './features/user/userSlice'
+import clipboardsReducer from './features/clipboards/clipboard-slice'
+import filesReducer from './features/files/file-slice'
+import userReducer from './features/user/user-slice'
 
 export const store = configureStore({
 	reducer: { clipboards: clipboardsReducer, user: userReducer, files: filesReducer },

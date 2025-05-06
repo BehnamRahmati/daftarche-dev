@@ -94,12 +94,8 @@ export type MediaType = (typeof MediaType)[keyof typeof MediaType]
 
 
 export const FileType: {
-  IMAGE: 'IMAGE',
-  VIDEO: 'VIDEO',
-  DOCUMENT: 'DOCUMENT',
-  AUDIO: 'AUDIO',
-  ARCHIVE: 'ARCHIVE',
-  OTHER: 'OTHER'
+  DIRECT: 'DIRECT',
+  PROXY: 'PROXY'
 };
 
 export type FileType = (typeof FileType)[keyof typeof FileType]
@@ -16384,7 +16380,7 @@ export namespace Prisma {
     id?: string
     url: string
     filename: string
-    type: $Enums.FileType
+    type?: $Enums.FileType
     size: number
     mimeType: string
     status?: $Enums.FileStatus
@@ -16404,7 +16400,7 @@ export namespace Prisma {
     id?: string
     url: string
     filename: string
-    type: $Enums.FileType
+    type?: $Enums.FileType
     size: number
     mimeType: string
     status?: $Enums.FileStatus
@@ -16464,7 +16460,7 @@ export namespace Prisma {
     id?: string
     url: string
     filename: string
-    type: $Enums.FileType
+    type?: $Enums.FileType
     size: number
     mimeType: string
     status?: $Enums.FileStatus
@@ -18547,7 +18543,7 @@ export namespace Prisma {
     id?: string
     url: string
     filename: string
-    type: $Enums.FileType
+    type?: $Enums.FileType
     size: number
     mimeType: string
     status?: $Enums.FileStatus
@@ -18566,7 +18562,7 @@ export namespace Prisma {
     id?: string
     url: string
     filename: string
-    type: $Enums.FileType
+    type?: $Enums.FileType
     size: number
     mimeType: string
     status?: $Enums.FileStatus
@@ -20188,7 +20184,7 @@ export namespace Prisma {
     id?: string
     url: string
     filename: string
-    type: $Enums.FileType
+    type?: $Enums.FileType
     size: number
     mimeType: string
     status?: $Enums.FileStatus

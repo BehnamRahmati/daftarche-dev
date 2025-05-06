@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { Link, NavLink } from 'react-router'
 import {
 	Sidebar,
@@ -42,7 +43,7 @@ const links = [
 	},
 ]
 
-export default function DashboardSidebar() {
+function DashboardSidebar() {
 	return (
 		<Sidebar>
 			<SidebarHeader>
@@ -103,3 +104,5 @@ export default function DashboardSidebar() {
 		</Sidebar>
 	)
 }
+
+export default memo(DashboardSidebar)

@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import useUser from '@/hooks/use-user'
-import { proxyUpload } from '@/store/features/files/files-thunks'
+import { proxyUpload } from '@/store/features/files/file-thunks'
 import { useAppDispatch } from '@/store/hooks'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { GlobalEdit } from 'iconsax-react'
@@ -47,11 +47,9 @@ export default function FilesProxyForm() {
 					render={({ field }) => (
 						<FormItem className='w-full'>
 							<FormControl>
-								<Input {...field} />
+								<Input {...field} placeholder='https://example.com/xyz?download' />
 							</FormControl>
-							<FormDescription>
-								Choose a single file from your device.
-							</FormDescription>
+							<FormDescription>Paste a File download Link .</FormDescription>
 							<FormMessage />
 						</FormItem>
 					)}

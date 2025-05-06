@@ -1,4 +1,5 @@
 import FilesProxyForm from '@/components/dashboard/files/forms/files-proxy-form'
+import FileProxyList from '@/components/dashboard/files/proxy/file-proxy-list'
 
 export default function Proxy() {
 	return (
@@ -9,6 +10,7 @@ export default function Proxy() {
 				of your devices.
 			</p>
 			<FilesProxyForm />
+			<FileProxyList />
 		</div>
 	)
 }

@@ -2,19 +2,19 @@ import ListLoading from '@/list-loading'
 import {
 	selectFilesAreLoading,
 	selectFilesError,
-	selectUploadFiles,
+	selectProxyFiles,
 } from '@/store/features/files/file-selectors'
-import { fetchUploadFiles } from '@/store/features/files/file-thunks'
+import { fetchProxyFiles } from '@/store/features/files/file-thunks'
 import { selectUser } from '@/store/features/user/user-selectors'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { useEffect, useRef } from 'react'
 import FileItem from '../file-item'
 
-export default function FileUploadsList() {
+export default function FileProxyList() {
 	const dispatch = useAppDispatch()
 	const user = useAppSelector(selectUser)
 	const userId = user?.id
-	const files = useAppSelector(selectUploadFiles)
+	const files = useAppSelector(selectProxyFiles)
 	const filesItems = files?.length
 	const isLoading = useAppSelector(selectFilesAreLoading)
 	const error = useAppSelector(selectFilesError)
@@ -23,7 +23,7 @@ export default function FileUploadsList() {
 
 	useEffect(() => {
 		if (userId && filesListRef.current && !filesItems) {
-			dispatch(fetchUploadFiles(userId))
+			dispatch(fetchProxyFiles(userId))
 		}
 	}, [userId, dispatch, filesItems])
 

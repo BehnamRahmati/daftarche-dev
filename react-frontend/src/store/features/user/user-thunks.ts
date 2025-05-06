@@ -1,6 +1,7 @@
 import { backendurl } from '@/lib/env'
 import { TUser } from '@/lib/types'
 import { createAsyncThunk } from '@reduxjs/toolkit'
+import { TError } from './user-slice'
 
 type registerPayload = {
 	message: string
@@ -22,7 +23,7 @@ type logoutPayload = {
 export const login = createAsyncThunk<
 	loginPayload,
 	{ email: string; password: string },
-	{ rejectValue: string }
+	{ rejectValue: TError }
 >('user/login', async (loginData, { rejectWithValue }) => {
 	try {
 		const response = await fetch(`http://localhost:3000/auth/login-json`, {
@@ -35,20 +36,26 @@ export const login = createAsyncThunk<
 		})
 		if (!response.ok) {
 			const errorData = await response.json()
-			return rejectWithValue(errorData.message || 'Failed to login user')
+			return rejectWithValue({
+				message: errorData.message || 'Failed to login user',
+				code: errorData.code,
+			})
 		}
 		const data: loginPayload = await response.json()
 		return data
-	} catch (error) {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	} catch (error: any) {
 		console.log(error)
-		return rejectWithValue('An unexpected error occurred while login user')
+		return rejectWithValue({
+			message: error.message || 'An unexpected error occurred during login.',
+		})
 	}
 })
 
 export const register = createAsyncThunk<
 	registerPayload,
 	{ email: string; password: string; name: string },
-	{ rejectValue: string }
+	{ rejectValue: TError }
 >('user/register', async (registerData, { rejectWithValue }) => {
 	try {
 		const response = await fetch(`${backendurl}/auth/register`, {
@@ -61,22 +68,26 @@ export const register = createAsyncThunk<
 		})
 		if (!response.ok) {
 			const errorData = await response.json()
-			return rejectWithValue(errorData.message || 'Failed to register user') // Updated error message
+			return rejectWithValue({
+				message: errorData.message || 'Failed to register user',
+				code: errorData.code,
+			})
 		}
-		const data: registerPayload = await response.json() // Use updated payload type
+		const data: registerPayload = await response.json()
 		return data
-	} catch (error) {
-		// Handle network errors or other exceptions
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	} catch (error: any) {
 		console.log(error)
-		return rejectWithValue('An unexpected error occurred while registering user') // Updated error message
+		return rejectWithValue({
+			message: error.message || 'An unexpected error occurred while registering user',
+		})
 	}
 })
 
-// New thunk to check authentication status
 export const checkAuthStatus = createAsyncThunk<
 	checkAuthStatusPayload,
-	void, // No arguments needed for this thunk
-	{ rejectValue: string }
+	void,
+	{ rejectValue: TError }
 >('user/checkAuthStatus', async (_, { rejectWithValue }) => {
 	try {
 		const response = await fetch(`${backendurl}/auth/status`, {
@@ -89,23 +100,28 @@ export const checkAuthStatus = createAsyncThunk<
 		})
 
 		if (!response.ok) {
-			// If status is 401 or similar, it means not authenticated
 			if (response.status === 401) {
-				return { user: null } // Return null user explicitly for unauthenticated
+				return { user: null }
 			}
-			const errorData = await response.json().catch(() => ({})) // Try to parse error, default to empty object
-			return rejectWithValue(errorData.message || 'Failed to check auth status')
+			const errorData = await response.json().catch(() => ({}))
+			return rejectWithValue({
+				message: errorData.message || 'Failed to check status ',
+				code: errorData.code,
+			})
 		}
 
 		const data: checkAuthStatusPayload = await response.json()
-		return data // Should contain { user: TUser } or { user: null }
-	} catch (error) {
+		return data
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	} catch (error: any) {
 		console.error('Auth status check error:', error)
-		return rejectWithValue('An unexpected error occurred while checking auth status')
+		return rejectWithValue({
+			message: error.message || 'An unexpected error occurred while checking auth status',
+		})
 	}
 })
 
-export const logout = createAsyncThunk<logoutPayload, void, { rejectValue: string }>(
+export const logout = createAsyncThunk<logoutPayload, void, { rejectValue: TError }>(
 	'user/logout',
 	async (_, { rejectWithValue }) => {
 		try {
@@ -119,14 +135,20 @@ export const logout = createAsyncThunk<logoutPayload, void, { rejectValue: strin
 
 			if (!response.ok) {
 				const errorData = await response.json().catch(() => ({}))
-				return rejectWithValue(errorData.message || 'Failed to logout')
+				return rejectWithValue({
+					message: errorData.message || 'Failed to logout ',
+					code: errorData.code,
+				})
 			}
 			// document.cookie = 'connect.sid=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;'
 			const data: logoutPayload = await response.json()
 			return data
-		} catch (error) {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		} catch (error: any) {
 			console.error('logout error:', error)
-			return rejectWithValue('An unexpected error occurred while loging out')
+			return rejectWithValue({
+				message: error.message || 'An unexpected error occurred while loging out',
+			})
 		}
 	},
 )

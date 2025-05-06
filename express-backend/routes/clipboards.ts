@@ -25,6 +25,7 @@ router.get('/:id', async function (req, res) {
 			orderBy: {
 				createdAt: 'desc',
 			},
+			take: 10,
 		})
 		res.status(200).send({ clipboards })
 	} catch (error) {

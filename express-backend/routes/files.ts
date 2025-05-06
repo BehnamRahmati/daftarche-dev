@@ -25,7 +25,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage })
 
 /* GET users listing. */
-router.get('/:id', async function (req, res, next) {
+router.get('/:id/uploads', async function (req, res, next) {
 	try {
 		const { id } = req.params
 		if (!id) {
@@ -48,7 +48,48 @@ router.get('/:id', async function (req, res, next) {
 		const files = await prisma.file.findMany({
 			where: {
 				userId: id,
+				type: 'DIRECT',
 			},
+			orderBy: {
+				createdAt: 'desc',
+			},
+			take: 10,
+		})
+		res.status(200).json({ message: 'Successfully retrieved files', files })
+	} catch (error) {
+		console.log(error)
+		res.status(500).json({ message: 'Internal server error' })
+	}
+})
+router.get('/:id/proxy', async function (req, res, next) {
+	try {
+		const { id } = req.params
+		if (!id) {
+			res.status(400).json({ message: 'Missing parameters' })
+			return
+		}
+		const user = prisma.user.findUnique({
+			where: {
+				id,
+			},
+			select: {
+				id: true,
+			},
+		})
+		if (!user) {
+			res.status(404).json({ message: 'User not found' })
+			return
+		}
+
+		const files = await prisma.file.findMany({
+			where: {
+				userId: id,
+				type: 'PROXY',
+			},
+			orderBy: {
+				createdAt: 'desc',
+			},
+			take: 10,
 		})
 		res.status(200).json({ message: 'Successfully retrieved files', files })
 	} catch (error) {
@@ -57,7 +98,7 @@ router.get('/:id', async function (req, res, next) {
 	}
 })
 
-router.post('/:id', upload.single('file'), async (req: Request, res: Response) => {
+router.post('/:id/upload', upload.single('file'), async (req: Request, res: Response) => {
 	try {
 		const uploadedFile = req.file
 		console.log(uploadedFile)
@@ -81,13 +122,38 @@ router.post('/:id', upload.single('file'), async (req: Request, res: Response) =
 				mimeType: uploadedFile?.mimetype || '',
 				size: uploadedFile?.size || 0,
 				url: fileUrl,
-				type: 'OTHER',
 				status: 'COMPLETED',
 				user: { connect: { id } },
 			},
 		})
 
 		res.status(201).json({ message: 'File uploaded successfully', file: file })
+	} catch (error) {
+		console.log(error)
+		res.status(500).json({ message: 'Internal server error' })
+	}
+})
+
+router.post('/:id/proxy', (req: Request, res: Response) => {
+	try {
+		const { id } = req.params
+		const { url } = req.body
+
+		if (!id || !url) {
+			res.status(400).json({ message: 'Missing parameters' })
+			return
+		}
+
+		const userExists = prisma.user.findUnique({
+			where: { id },
+			select: { id: true },
+		})
+		if (!userExists) {
+			res.status(404).json({ message: 'User not found' })
+			return
+		}
+
+		res.status(201).json({ message: 'File uploaded successfully' })
 	} catch (error) {
 		console.log(error)
 		res.status(500).json({ message: 'Internal server error' })

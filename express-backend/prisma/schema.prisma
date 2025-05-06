@@ -131,24 +131,16 @@ model ConversationParticipant {
 
 model Contact {
   id        String @id @default(cuid())
-  ownerId   String // The user who owns the contact list
+  ownerId   String
   owner     User   @relation("UserOwnedContacts", fields: [ownerId], references: [id])
-  contactId String // The user who is a contact
+  contactId String
   contact   User   @relation("UserInOtherContacts", fields: [contactId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
-  @@unique([ownerId, contactId]) // Avoid duplicate contacts
+  @@unique([ownerId, contactId])
   @@index([ownerId])
   @@index([contactId])
-}
-
-enum MediaType {
-  IMAGE
-  VIDEO
-  DOCUMENT
-  AUDIO
-  OTHER
 }
 
 model Message {
@@ -177,27 +169,31 @@ model Message {
 model Media {
   id           String    @id @default(cuid())
   url          String // URL to stored media
-  type         MediaType // Type of media
-  mimeType     String? // MIME type for proper handling
-  filename     String? // Original filename
-  size         Int? // File size in bytes
-  width        Int? // Image/video width
-  height       Int? // Image/video height
-  duration     Int? // Video/audio duration in seconds
-  thumbnailUrl String? // URL to thumbnail for videos/images
+  type         MediaType
+  mimeType     String?
+  filename     String?
+  size         Int?
+  width        Int?
+  height       Int?
+  duration     Int?
+  thumbnailUrl String?
   messageId    String
   message      Message   @relation(fields: [messageId], references: [id], onDelete: Cascade)
   createdAt    DateTime  @default(now())
 }
 
-// Add these new enums first
-enum FileType {
+enum MediaType {
   IMAGE
   VIDEO
   DOCUMENT
   AUDIO
-  ARCHIVE
   OTHER
+}
+
+// Add these new enums first
+enum FileType {
+  DIRECT
+  PROXY
 }
 
 enum FileStatus {
@@ -209,25 +205,25 @@ enum FileStatus {
 // Add the File model
 model File {
   id              String     @id @default(cuid())
-  url             String     @unique // File storage URL
-  filename        String // Original filename
-  type            FileType // File category
-  size            Int // File size in bytes
-  mimeType        String // MIME type
+  url             String     @unique
+  filename        String
+  type            FileType   @default(DIRECT)
+  size            Int
+  mimeType        String
   status          FileStatus @default(PENDING)
-  virusScanStatus String     @default("pending") // Could be enum if needed
+  virusScanStatus String     @default("pending")
   userId          String
   user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
-  deletedAt       DateTime? // For soft deletion
+  deletedAt       DateTime?
   downloads       Int        @default(0)
 
   // Optional metadata fields
-  width        Int? // For images/videos
-  height       Int? // For images/videos
-  duration     Int? // For audio/video
-  thumbnailUrl String? // For media previews
+  width        Int?
+  height       Int?
+  duration     Int?
+  thumbnailUrl String?
 
   @@index([userId])
   @@index([createdAt])

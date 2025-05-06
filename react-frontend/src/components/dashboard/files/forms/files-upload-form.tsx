@@ -8,9 +8,9 @@ import {
 	FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import useUser from '@/hooks/use-user'
-import { uploadFile } from '@/store/features/files/files-thunks'
-import { useAppDispatch } from '@/store/hooks'
+import { uploadFile } from '@/store/features/files/file-thunks'
+import { selectUser } from '@/store/features/user/user-selectors'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { DocumentUpload } from 'iconsax-react'
 import { useForm } from 'react-hook-form'
@@ -24,7 +24,7 @@ const uploadFormSchema = z.object({
 
 export default function FilesUploadForm() {
 	const dispatch = useAppDispatch()
-	const { user } = useUser()
+	const user = useAppSelector(selectUser)
 	const form = useForm<z.infer<typeof uploadFormSchema>>({
 		resolver: zodResolver(uploadFormSchema),
 		defaultValues: {

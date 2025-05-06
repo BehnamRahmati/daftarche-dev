@@ -9,10 +9,17 @@ import {
 	FetchClipboardsPayload,
 } from './clipboard-thunks'
 
+export type TError = {
+	message: string
+	code?: string
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	details?: any
+} | null
+
 type clipbordsState = {
 	clipboards: TClipboard[] | []
 	isLoading: boolean
-	error: string | null
+	error: TError
 }
 
 const initialState: clipbordsState = {
@@ -42,7 +49,7 @@ export const clipboardsSlice = createSlice({
 			)
 			.addCase(fetchClipboards.rejected, (state, action) => {
 				state.isLoading = false
-				state.error = action.payload || 'Failed to load clipboards'
+				state.error = action.payload || { message: 'Failed to load clipboards' }
 			})
 			.addCase(addClipboard.pending, state => {
 				state.error = null
@@ -55,7 +62,7 @@ export const clipboardsSlice = createSlice({
 				},
 			)
 			.addCase(addClipboard.rejected, (state, action) => {
-				state.error = action.payload || 'Failed to add clipboard'
+				state.error = action.payload || { message: 'Failed to add clipboard' }
 			})
 			.addCase(editClipboard.pending, state => {
 				state.error = null
@@ -73,7 +80,7 @@ export const clipboardsSlice = createSlice({
 				},
 			)
 			.addCase(editClipboard.rejected, (state, action) => {
-				state.error = action.payload || 'Failed to edit clipboard'
+				state.error = action.payload || { message: 'Failed to edit clipboard' }
 			})
 			.addCase(deleteClipboards.pending, state => {
 				state.error = null
@@ -88,7 +95,7 @@ export const clipboardsSlice = createSlice({
 				},
 			)
 			.addCase(deleteClipboards.rejected, (state, action) => {
-				state.error = action.payload || 'Failed to delete clipboard'
+				state.error = action.payload || { message: 'Failed to delete clipboard' }
 			})
 	},
 })

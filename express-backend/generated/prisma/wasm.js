@@ -279,12 +279,8 @@ exports.MediaType = exports.$Enums.MediaType = {
 };
 
 exports.FileType = exports.$Enums.FileType = {
-  IMAGE: 'IMAGE',
-  VIDEO: 'VIDEO',
-  DOCUMENT: 'DOCUMENT',
-  AUDIO: 'AUDIO',
-  ARCHIVE: 'ARCHIVE',
-  OTHER: 'OTHER'
+  DIRECT: 'DIRECT',
+  PROXY: 'PROXY'
 };
 
 exports.FileStatus = exports.$Enums.FileStatus = {
