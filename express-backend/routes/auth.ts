@@ -1,62 +1,9 @@
-import bcrypt from 'bcrypt'
 import express, { Router } from 'express'
 import passport from 'passport'
-import prisma from '../lib/prisma'
+import { registerUser } from '../controllers/auth/auth'
 const router: Router = express.Router()
 
-router.post('/register', async (req, res, next) => {
-	const { email, password, name } = req.body
-
-	if (!email || !password) {
-		res.status(400).json({ message: 'Email and password are required' })
-		return
-	}
-
-	try {
-		// Check if user already exists
-		const existingUser = await prisma.user.findUnique({
-			where: { email: email },
-		})
-
-		if (existingUser) {
-			res.status(409).json({ message: 'Email already in use' })
-			return
-		}
-
-		// Hash the password
-		const saltRounds = 10
-		const hashedPassword = await bcrypt.hash(password, saltRounds)
-
-		// Create the new user
-		const newUser = await prisma.user.create({
-			data: {
-				email: email,
-				hashedPassword: hashedPassword,
-				name: name,
-			},
-		})
-
-		// Exclude password from the response
-		const { hashedPassword: _, ...userWithoutPassword } = newUser
-
-		req.login(newUser, err => {
-			if (err) {
-				console.error('Login error after registration:', err)
-				res.status(500).json({
-					message: 'Internal server error during login after registration',
-				})
-				return
-			}
-			return res.status(201).json({
-				message: 'User created and logged in successfully',
-				user: userWithoutPassword,
-			})
-		})
-	} catch (error) {
-		console.error('Registration error:', error)
-		return next(error)
-	}
-})
+router.post('/register', registerUser)
 
 router.post(
 	'/login',

@@ -1,10 +1,16 @@
 import { configureStore } from '@reduxjs/toolkit'
 import clipboardsReducer from './features/clipboards/clipboard-slice'
+import contactReducer from './features/contacts/contact-slice'
 import filesReducer from './features/files/file-slice'
 import userReducer from './features/user/user-slice'
 
 export const store = configureStore({
-	reducer: { clipboards: clipboardsReducer, user: userReducer, files: filesReducer },
+	reducer: {
+		clipboards: clipboardsReducer,
+		user: userReducer,
+		files: filesReducer,
+		contacts: contactReducer,
+	},
 })
 
 // Infer the `RootState`,  `AppDispatch`, and `AppStore` types from the store itself

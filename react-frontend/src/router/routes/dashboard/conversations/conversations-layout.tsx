@@ -1,12 +1,14 @@
-import Contactslist from '@/components/dashboard/conversations/contacts-list'
-import LatestList from '@/components/dashboard/conversations/latest-list'
+import ListLoading from '@/components/list-loading'
 import {
 	Accordion,
 	AccordionContent,
 	AccordionItem,
 	AccordionTrigger,
 } from '@/components/ui/accordion'
+import { lazy, Suspense } from 'react'
 import { Outlet } from 'react-router'
+const Contactslist = lazy(() => import('@/components/dashboard/conversations/contacts-list'))
+const LatestList = lazy(() => import('@/components/dashboard/conversations/latest-list'))
 
 export default function ConversationsLayout() {
 	return (
@@ -22,7 +24,11 @@ export default function ConversationsLayout() {
 					<AccordionItem value='contacts'>
 						<AccordionTrigger>Contacts :</AccordionTrigger>
 						<AccordionContent asChild>
-							<Contactslist />
+							<div className='p-1'>
+								<Suspense fallback={<ListLoading />}>
+									<Contactslist />
+								</Suspense>
+							</div>
 						</AccordionContent>
 					</AccordionItem>
 				</Accordion>

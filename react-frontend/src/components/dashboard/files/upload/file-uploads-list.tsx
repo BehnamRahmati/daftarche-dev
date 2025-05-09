@@ -1,4 +1,4 @@
-import ListLoading from '@/list-loading'
+import ListLoading from '@/components/list-loading'
 import {
 	selectFilesAreLoading,
 	selectFilesError,

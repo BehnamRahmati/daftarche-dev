@@ -10,8 +10,8 @@ import configurePassport from './config/passport.config'
 
 import authRouter from './routes/auth'
 import clipboardsRouter from './routes/clipboards'
+import conversationsRouter from './routes/conversations'
 import filesRouter from './routes/files'
-import indexRouter from './routes/index'
 import usersRouter from './routes/users'
 
 const app: Express = express()
@@ -32,18 +32,18 @@ app.use(express.static(path.join(__dirname, 'public')))
 app.use('/uploads', express.static(staticUploadsPath))
 app.use(
 	session({
-		secret: process.env.SESSION_SECRET || 'YOUR_SESSION_SECRET', // Use environment variable!
+		secret: process.env.SESSION_SECRET || 'YOUR_SESSION_SECRET',
 		resave: false,
 		saveUninitialized: false,
 		cookie: { secure: process.env.NODE_ENV === 'production' },
 	}),
 )
 
-configurePassport() // Call the function to set up strategies
+configurePassport()
 app.use(passport.initialize())
 app.use(passport.session())
 
-app.use('/', indexRouter)
+app.use('/conversations', conversationsRouter)
 app.use('/users', usersRouter)
 app.use('/clipboards', clipboardsRouter)
 app.use('/auth', authRouter)
